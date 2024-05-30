@@ -15,7 +15,7 @@ const MIME_TYPES = {
 async function resizeImage(file) {
   const absolutePath = path.resolve(file.path);
   const extension = MIME_TYPES[file.mimetype];
-  const destinationPath = absolutePath.replace(`.${extension}`, '.avif');
+  const destinationPath = absolutePath.replace(`.${extension}`, '');
   
   sharp.cache(false); 
   await sharp(absolutePath)
@@ -28,6 +28,6 @@ async function resizeImage(file) {
       console.log(err);
     }
   });
-  return file.path.replace(`.${extension}`, '.avif');
+  return file.path.replace(`.${extension}`, '');
 }
 module.exports = { resizeImage };
