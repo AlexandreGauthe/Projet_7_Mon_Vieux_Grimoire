@@ -1,9 +1,11 @@
+// Middleware pour la gestion des fichiers entrant en l'occurance des images des livres //
 const multer = require('multer');
-const sharp = require('sharp');
 const MIME_TYPES = {
     'image/jpg': 'jpg',
     'image/jpeg': 'jpg',
-    'image/png': 'png'
+    'image/png': 'png',
+    'image/webp': 'webp',
+  'image/avif': 'avif',
 };
 
 const storage = multer.diskStorage({

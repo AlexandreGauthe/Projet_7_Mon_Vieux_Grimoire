@@ -1,27 +1,33 @@
-const sharp = require('sharp'); // Module Sharp pour le traitement d'images
-const path = require('path'); // Module Path pour la manipulation des chemins de fichiers
-const fs = require('fs'); // Module fs pour les opérations de fichiers
+// Fonction asynchrone pour redimensionner une image
 
-// Définition des types MIME pour les extensions d'images
+const sharp = require('sharp'); 
+const path = require('path');
+const fs = require('fs'); 
+
 const MIME_TYPES = {
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
   'image/png': 'png',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
 };
 
-function resizeImage(file) {
+async function resizeImage(file) {
   const absolutePath = path.resolve(file.path);
-  // Obtention de l'extension du fichier à partir du type MIME
   const extension = MIME_TYPES[file.mimetype];
+  const destinationPath = absolutePath.replace(`.${extension}`, '.avif');
+  
   sharp.cache(false); 
-  // Utilisation de Sharp pour redimensionner l'image
-     sharp(absolutePath)
+  await sharp(absolutePath)
     .resize({ width: 800, fit: 'contain' })
-  // Suppression de l'image originale après redimensionnement
+    .avif()
+    .toFile(destinationPath);
+
   fs.unlink(absolutePath, (err) => {
     if (err) {
       console.log(err);
     }
   });
+  return file.path.replace(`.${extension}`, '.avif');
 }
 module.exports = { resizeImage };

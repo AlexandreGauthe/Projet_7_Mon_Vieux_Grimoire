@@ -4,7 +4,6 @@ const router = express.Router();
 const multer = require('../middleware/multer-config');
 const booksCtlr = require('../controllers/book');
 
-
 router.post('/', auth, multer, booksCtlr.addBook);
 router.get('/', booksCtlr.showAllBooks);
 router.get('/:id/ratings',booksCtlr.getBookRatings);
