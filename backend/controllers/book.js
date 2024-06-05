@@ -79,30 +79,36 @@ exports.showAllBooks = (req, res, next) => {
     .catch(error => { res.status(400).json({ error })});
     };
  
- //Contrôlleur pour modifier un livre// 
- exports.modifyBook= (req, res, next) => {
-  const bookObject = req.file ? {
-      ...JSON.parse(req.body.book),
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-      
-  } : { ...req.body };
-
-  delete bookObject._userId;
-
-  Book.findOne({_id: req.params.id})
-      .then((book) => {
-          if (book.userId != req.auth.userId) {
-              res.status(401).json({ message : 'Not authorized'});
-          } else {
-              Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
-              .then(() => res.status(200).json({message : 'Objet modifié!'}))
-              .catch(error => res.status(401).json({ error }));
+  //Contrôleur pour la modification du livre
+  exports.modifyBook = async (req, res, next) => {
+    try {
+      let filename;
+      if (req.file) filename = await sharp.resizeImage(req.file);
+      const bookObject = req.file
+        ? {
+            ...JSON.parse(req.body.book),
+            imageUrl: `${req.protocol}://${req.get('host')}/${filename}`,
           }
-      })
-      .catch((error) => {
-          res.status(400).json({ error });
-      });
-};
+        : { ...req.body };
+
+      delete bookObject._userId;
+      const book = await Book.findOne({ _id: req.params.id });
+      if (book.userId != req.auth.userId) {
+        return res.status(401).json({ message: 'Non autorisé' });
+      }
+      if (req.file && book.imageUrl) {
+        const filename = book.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, (err) => {
+          if (err) console.log(err);
+        });
+      }
+      await Book.updateOne({ _id: req.params.id }, { ...bookObject });
+      res.status(200).json({ message: 'Livre modifié !' });
+      } catch (error) {
+      next(error);
+    }
+  };
+
   //Contrôlleur pour effacer un livre//
   exports.deleteBook = (req, res, next) => {
     Book.findOne({_id: req.params.id})
